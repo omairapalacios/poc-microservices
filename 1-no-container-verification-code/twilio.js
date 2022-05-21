@@ -9,27 +9,27 @@ const client = new Twilio(accountSid, authToken);
 async function sendVerificationCode(to) {
   try {
     await client.verify.services(sid)
-    .verifications
-    .create({to: to, channel: 'sms'})
+      .verifications
+      .create({ to: to, channel: 'sms' })
   }
-  catch(error) {
+  catch (error) {
     throw Error(error);
   }
 };
 
 async function verifyCode(to, code) {
-  try{
+  try {
     const result = await client.verify.services(sid)
-          .verificationChecks
-          .create({to: to, code: code })
+      .verificationChecks
+      .create({ to: to, code: code })
     return result.status;
   }
-  catch(error){
+  catch (error) {
     throw Error(error);
   }
 }
 
 module.exports = {
-    sendVerificationCode,
-    verifyCode
+  sendVerificationCode,
+  verifyCode
 }
