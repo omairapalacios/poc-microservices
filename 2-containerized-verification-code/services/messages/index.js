@@ -4,8 +4,9 @@ const { sendVerificationCode, verifyCode } = require('./twilio');
 const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+app.set('port', process.env.PORT || 3000);
 
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
     res.json({ name: 'POC - Microservice - Patpro', version: '1.0.0' });
 })
 
@@ -38,6 +39,9 @@ app.post('/api/messages/verify-code', async (req, res) => {
     }
 });
 
-app.listen(3000, () => {
-    console.log("Server online");
-})
+app.listen(app.get('port'), () => {
+  console.info(
+    '\x1b[33m%s\x1b[0m',
+    `>>> Server listening on port ${app.get('port')} 🚀 `
+  );
+});
