@@ -10,7 +10,7 @@ async function sendVerificationCode(to) {
   try {
     await client.verify.services(sid)
       .verifications
-      .create({ to: to, channel: 'sms' })
+      .create({ to: to, channel: 'whatsapp' })
   }
   catch (error) {
     throw Error(error);

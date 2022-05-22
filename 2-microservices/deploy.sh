@@ -2,9 +2,8 @@ REGION=$1
 STACK_NAME=$2
 
 DEPLOYABLE_SERVICES=(
-	users
-	threads
-	posts
+	messages
+	others
 );
 
 PRIMARY='\033[0;34m'

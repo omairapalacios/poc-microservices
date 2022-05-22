@@ -1,13 +1,12 @@
 const express = require('express');
-const { sendVerificationCode, verifyCode } = require('./twilio');
-
 const app = express();
+
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.set('port', process.env.PORT || 3000);
 
 app.get('/api', (req, res) => {
-  res.json({ name: 'POC - Microservice - Patpro', version: '1.0.0' });
+  res.json({ name: 'POC - Microservices', version: '1.0.0' });
 });
 
 app.get('/api/others', async (req, res) => {
