@@ -143,6 +143,17 @@ Una vez que hayamos verificado que este nuevo microservicio funciona, podemos el
    $ ./deploy.sh <región> <nombre de pila>
 
 ![](./assets/14.PNG)
-![](./assets/16.PNG)
+
+### Ahora si, A probar !
+
+-  Microservicio que resuelve en la ruta : _/api/messages/_
 ![](./assets/17.PNG)
 ![](./assets/18.PNG)
+![](./assets/Patpro4.jpg)
+
+
+-  Microservicio que resuelve en la ruta : _/api/others/_
+![](./assets/16.PNG)
+
+<font size="1">Como plantilla para otros servicios</font>
+
