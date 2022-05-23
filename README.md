@@ -154,8 +154,8 @@ Una vez que hayamos verificado que este nuevo microservicio funciona, podemos el
 </div>
 
 
--  Microservicio que resuelve en la ruta : _/api/others/_
+-  Microservicio que resuelve en la ruta : _/api/others/_ (<font size="1">Como plantilla para otros servicios</font>)
+
 ![](./assets/16.PNG)
 
-<font size="1">Como plantilla para otros servicios</font>
 
