@@ -73,6 +73,7 @@ _Fuente: AWS Labs._
 
 ### Paso 2:  Cambios en la aplicación para microservicios
 
+
 __Definir los límites de los microservicios:__ Definir los límites de los servicios es específico del diseño de su aplicación, pero para esta API REST, un enfoque bastante claro para dividirla es crear un servicio para cada una de las clases de objetos de nivel superior que sirve la API:
 
 ```
