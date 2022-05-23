@@ -17,6 +17,8 @@ Podemos usar un Balanceador de carga de aplicaciones para realizar solicitudes d
 
 En este ejemplo, tomamos nuestra aplicación de nodejs y la colocamos en un contenedor para su implementación en EC2 Container Service.
 
+![](./assets/Patpro.drawio.png)
+
 ### Paso 1: Exploración
 En la carpeta de proyecto con la ruta : _1-services_, debe ver las carpetas para infraestructura y servicios. La infraestructura posee el código de configuración de la infraestructura AWS CloudFormation que utilizará en el siguiente paso. Servicios contiene el código que forma la aplicación de node.js.
 
@@ -33,8 +35,41 @@ En la página Crear repositorio, introduzca el siguiente nombre para su reposito
 
 
 ## Implementación del monolito
+En este ejemplo, tomamos nuestra aplicación de nodo y la colocamos en un contenedor para su implementación en EC2 Container Service.
 
-### Paso 1: Lanzar un cluster de ECS mediante cloud formation.:
+![](./assets/Patpro2.drawio.png)
+
+### ¿Por qué contenedores?
+
+__Control de dependencia__: los contenedores envuelven el código de la aplicación en una unidad de implementación que captura una instantánea del código y sus dependencias, lo que resuelve algunos problemas:
+
+- Es posible que la versión de `nodo` en la máquina de un desarrollador local no coincida con la versión en los servidores de producción o la versión en el servidor de CI, lo que permite a los desarrolladores enviar código que se ejecuta localmente pero falla en producción. Por otro lado, un contenedor se enviará con una versión específica de nodo incluida.
+- Si las dependencias de `package.json` no se reducen rigurosamente, entonces `npm install` puede terminar instalando diferentes versiones de paquetes localmente, en un servidor CI y en los servidores de producción. Los contenedores resuelven esto al incluir todas las dependencias de npm con el código de la aplicación.
+
+__Canalización mejorada__: el contenedor también permite que una organización de ingeniería cree una canalización estándar para el ciclo de vida de la aplicación. Por ejemplo:
+
+- Los desarrolladores construyen y ejecutan el contenedor localmente.
+- El servidor de CI ejecuta el mismo contenedor y ejecuta pruebas de integración para asegurarse de que supera las expectativas.
+- El mismo contenedor se envía a un entorno de prueba donde se puede verificar su comportamiento en tiempo de ejecución mediante pruebas de carga o control de calidad manual.
+- El mismo contenedor finalmente se envía a producción.
+
+Ser capaz de enviar exactamente el mismo contenedor a través de las cuatro etapas del proceso hace que la entrega de una aplicación confiable y de alta calidad sea considerablemente más fácil.
+
+__Sin mutaciones en las máquinas:__ Cuando las aplicaciones se implementan directamente en las instancias, corre el riesgo de que una mala implementación corrompa la configuración de una instancia de una manera que sea difícil de recuperar.
+
+### ¿Por qué el servicio de contenedores EC2?
+
+EC2 Container Service proporciona orquestación para sus contenedores. Automatiza el proceso de lanzamiento de contenedores en su flota de instancias de acuerdo con las reglas que especifique, luego automatiza el seguimiento de dónde se ejecutan esos contenedores para que pueda usar un balanceador de carga para enviar tráfico a ellos. También tiene funciones integradas para implementar implementaciones sin tiempo de inactividad, recopilar métricas y registros de sus contenedores y escalar automáticamente la cantidad de contenedores que está ejecutando en función de las métricas.
+
+### Cambios en la aplicación para Docker
+
+__Proceso único en lugar de `clúster`.__ El primer y mayor cambio relacionado con la creación de contenedores de esta aplicación es deshacerse del `clúster`. Con los contenedores docker, el objetivo es ejecutar un solo proceso por contenedor, en lugar de un grupo de procesos.
+
+__Crear `Dockerfile`:__ Este archivo es básicamente un script de compilación que crea el contenedor. El contenedor base desde el que se inicia el dockerfile contiene una versión específica de node.js. Luego, el resto de los comandos agregan tanto el código de la aplicación como la carpeta `node_modules` al contenedor. El resultado es una imagen de contenedor que es una unidad de implementación confiable. El contenedor se puede ejecutar localmente o en un servidor remoto. Funcionará igual en ambos lugares.
+
+
+_Fuente: AWS Labs._
+### Paso 1: Lanzar un cluster de ECS mediante cloud formation
 
    ```
    $ aws cloudformation deployment \
@@ -58,6 +93,7 @@ En la página Crear repositorio, introduzca el siguiente nombre para su reposito
 ## Del monolito a los microservicios
 
 En este ejemplo, tomamos nuestra aplicación monolítica implementada en ECS y la dividimos en microservicios.
+![](./assets/Patpro3.drawio.png)
 
 ### Paso 1: ¿Por qué microservicios?
 
