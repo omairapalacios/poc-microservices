@@ -149,7 +149,9 @@ Una vez que hayamos verificado que este nuevo microservicio funciona, podemos el
 -  Microservicio que resuelve en la ruta : _/api/messages/_
 ![](./assets/17.PNG)
 ![](./assets/18.PNG)
-![](./assets/Patpro4.jpg)
+<div align="center" style="margin-bottom:30px">
+  <img src="https://github.com/omairapalacios/poc-microservices/blob/main/assets/Patpro4.jpg" width="400" title="poc">
+</div>
 
 
 -  Microservicio que resuelve en la ruta : _/api/others/_
