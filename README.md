@@ -1,8 +1,8 @@
-### Migración de una aplicación Monolitica a Microservicios
+# Migración de una aplicación Monolitica a Microservicios
 
-Microservicio para enviar y validar códigos de verificación.
+Caso aplicado: Microservicio para enviar y validar códigos de verificación.
 
-## Servidor hecho en Node.js
+### Servidor hecho en Node.js
 Este es un ejemplo de un servicio node.js monolítico básico que ha sido diseñado para ejecutarse directamente en un servidor, sin un contenedor.
 
 ### Arquitectura
@@ -32,19 +32,19 @@ En la página Crear repositorio, introduzca el siguiente nombre para su reposito
 ![](./assets/1.PNG)
 
 
-## Despliegue
+## Implementación del monolito
 
-1. Inicie un clúster de ECS con la plantilla de Cloudformation:
+### Paso 1: Lanzar un cluster de ECS mediante cloud formation.:
 
    ```
    $ aws cloudformation deployment \
-   --template-file infraestructura/ecs.yml \
+   --template-file infrastructure/ecs.yml \
    --región <región> \
    --stack-name <nombre de la pila> \
    --capacidades CAPABILITY_NAMED_IAM
    ```
 
-2. Implemente los servicios en su clúster:
+### Paso 2: Implemente los servicios en el clúster:
 
    ```
    $ ./deploy.sh <región> <nombre de pila>
@@ -54,26 +54,25 @@ En la página Crear repositorio, introduzca el siguiente nombre para su reposito
 
 En este ejemplo, tomamos nuestra aplicación monolítica implementada en ECS y la dividimos en microservicios.
 
-![Arquitectura de referencia de microservicios en EC2 Container Service](../images/microservice-containers.png)
+### Paso 1: ¿Por qué microservicios?
 
-## ¿Por qué microservicios?
+__Aislamiento de fallas:__ Una buena arquitectura de microservicios significa que si una micropieza de su servicio falla, solo esa parte de su servicio fallará. El resto de su servicio puede continuar funcionando correctamente.
 
-__Aislamiento de fallas:__ Incluso las mejores organizaciones de ingeniería pueden tener y tienen fallas fatales en la producción. Además de seguir todas las prácticas recomendadas estándar para gestionar correctamente los bloqueos, un enfoque que puede limitar el impacto de dichos bloqueos es la creación de microservicios. Una buena arquitectura de microservicios significa que si una micropieza de su servicio falla, solo esa parte de su servicio fallará. El resto de su servicio puede continuar funcionando correctamente.
+__Aislamiento por seguridad:__ Cuando se siguen las mejores prácticas de microservicios, el resultado es que si un atacante compromete un servicio, solo obtiene acceso a los recursos de ese servicio y no puede acceder horizontalmente a otros recursos de otros servicios sin entrar también en esos servicios.
 
-__Aislamiento por seguridad:__ En una aplicación monolítica, si una función de la aplicación tiene una brecha de seguridad, por ejemplo, una vulnerabilidad que permite la ejecución remota de código, entonces debe asumir que un atacante también podría haber obtenido acceso a todas las demás funciones del sistema. Esto puede ser peligroso si, por ejemplo, su función de carga de avatar tiene un problema de seguridad que termina comprometiendo su base de datos con contraseñas de usuario. La separación de sus funciones en microservicios mediante EC2 Container Service le permite bloquear el acceso a los recursos de AWS otorgando a cada servicio su propia función de IAM. Cuando se siguen las mejores prácticas de microservicios, el resultado es que si un atacante compromete un servicio, solo obtiene acceso a los recursos de ese servicio y no puede acceder horizontalmente a otros recursos de otros servicios sin entrar también en esos servicios.
+__Escalado independiente:__ Cuando las características se dividen en microservicios, la cantidad de infraestructura y el número de instancias de cada clase de microservicio se pueden escalar hacia arriba y hacia abajo de forma independiente. 
 
-__Escalado independiente:__ Cuando las características se dividen en microservicios, la cantidad de infraestructura y el número de instancias de cada clase de microservicio se pueden escalar hacia arriba y hacia abajo de forma independiente. Esto hace que sea más fácil medir el costo de la infraestructura de una función en particular, identificar las funciones que pueden necesitar optimizarse primero, así como mantener el rendimiento confiable para otras funciones si una función en particular está fuera de control sobre sus necesidades de recursos.
+__Velocidad de desarrollo__: los microservicios pueden permitir que un equipo construya más rápido al reducir el riesgo de desarrollo. En un monolito, agregar una nueva característica puede afectar potencialmente a todas las demás características que contiene el monolito. Los desarrolladores pueden estar seguros de que cualquier código que escriban en realidad no podrá afectar en absoluto al código existente, a menos que escriban explícitamente una conexión entre dos microservicios.
 
-__Velocidad de desarrollo__: los microservicios pueden permitir que un equipo construya más rápido al reducir el riesgo de desarrollo. En un monolito, agregar una nueva característica puede afectar potencialmente a todas las demás características que contiene el monolito. Los desarrolladores deben considerar cuidadosamente el impacto de cualquier código que agreguen y asegurarse de no romper nada. Por otro lado, una arquitectura de microservicio adecuada tiene un nuevo código para una nueva función que se incluye en un nuevo servicio. Los desarrolladores pueden estar seguros de que cualquier código que escriban en realidad no podrá afectar en absoluto al código existente, a menos que escriban explícitamente una conexión entre dos microservicios.
+_Fuente: AWS Labs._
 
-## Cambios en la aplicación para microservicios
+### Paso 2:  Cambios en la aplicación para microservicios
 
 __Definir los límites de los microservicios:__ Definir los límites de los servicios es específico del diseño de su aplicación, pero para esta API REST, un enfoque bastante claro para dividirla es crear un servicio para cada una de las clases de objetos de nivel superior que sirve la API:
 
 ```
-/api/users/* -> Un servicio para todas las rutas REST relacionadas con el usuario
-/api/posts/* -> Un servicio para todas las rutas REST relacionadas con publicaciones
-/api/threads/* -> Un servicio para todas las rutas REST relacionadas con subprocesos
+/api/messages/* -> Un servicio para todas las rutas REST relacionadas con el messages
+/api/others/* -> Un servicio para todas las rutas REST relacionadas con others
 ```
 
 Entonces, cada servicio solo servirá una clase particular de objeto REST, y nada más. Esto nos brindará algunas ventajas significativas en nuestra capacidad para monitorear y escalar de manera independiente cada servicio.
@@ -84,13 +83,13 @@ __Recortando lentamente:__ No siempre es posible desarmar por completo un servic
 
 Una vez que hayamos verificado que este nuevo microservicio funciona, podemos eliminar las rutas de código antiguas que ya no se ejecutan en el monolito. Cuando esté listo, repita el proceso dividiendo otra pequeña porción del código en un nuevo servicio. De esta manera, incluso los monolitos más complicados pueden romperse gradualmente de una manera segura que no pondrá en riesgo las características existentes.
 
-## Despliegue
+### Paso 3: Despliegue
 
-1. Inicie un clúster de ECS con la plantilla de Cloudformation:
+1. Inicie un clúster de ECS con la plantilla de Cloudformation ubicado en la ruta 2.microservices/infrastructure:
 
    ```
    $ aws cloudformation deployment \
-   --template-file infraestructura/ecs.yml \
+   --template-file infrastructure/ecs.yml \
    --región <región> \
    --stack-name <nombre de la pila> \
    --capacidades CAPABILITY_NAMED_IAM
