@@ -150,7 +150,7 @@ Una vez que hayamos verificado que este nuevo microservicio funciona, podemos el
 ![](./assets/17.PNG)
 ![](./assets/18.PNG)
 <div align="center" style="margin-bottom:30px">
-  <img src="https://github.com/omairapalacios/poc-microservices/blob/main/assets/Patpro4.jpg" width="400" title="poc">
+  <img src="https://github.com/omairapalacios/poc-microservices/blob/main/assets/Patpro4.jpg" width="300" heigth="500" title="poc">
 </div>
 
 
