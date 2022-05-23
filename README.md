@@ -1,6 +1,6 @@
-### POC Microservices
+### Migración de una aplicación Monolitica a Microservicios
 
-Microservices to send and validate verification code.
+Microservicio para enviar y validar códigos de verificación.
 
 ## Servidor hecho en Node.js
 Este es un ejemplo de un servicio node.js monolítico básico que ha sido diseñado para ejecutarse directamente en un servidor, sin un contenedor.
@@ -13,40 +13,24 @@ En este ejemplo, se utiliza un `clúster` para generar un proceso de trabajo por
 
 Podemos usar un Balanceador de carga de aplicaciones para realizar solicitudes de operación por turnos en varios servidores, lo que proporciona una escalabilidad horizontal.
 
-## Implementación en contenedores
+## Incluir el monolito en contenedores
 
-En este ejemplo, tomamos nuestra aplicación de nodo y la colocamos en un contenedor para su implementación en EC2 Container Service.
+En este ejemplo, tomamos nuestra aplicación de nodejs y la colocamos en un contenedor para su implementación en EC2 Container Service.
 
-### ¿Por qué contenedores?
+### Paso 1: Exploración
+En la carpeta de proyecto con la ruta : _1-services_, debe ver las carpetas para infraestructura y servicios. La infraestructura posee el código de configuración de la infraestructura AWS CloudFormation que utilizará en el siguiente paso. Servicios contiene el código que forma la aplicación de node.js.
 
-__Control de dependencia__: los contenedores envuelven el código de la aplicación en una unidad de implementación que captura una instantánea del código y sus dependencias, lo que resuelve algunos problemas:
+### Paso 2: Cree el repositorio:
 
-- Es posible que la versión de `nodo` en la máquina de un desarrollador local no coincida con la versión en los servidores de producción o la versión en el servidor de CI, lo que permite a los desarrolladores enviar código que se ejecuta localmente pero falla en producción. Por otro lado, un contenedor se enviará con una versión específica de nodo incluida.
-- Si las dependencias de `package.json` no se reducen rigurosamente, entonces `npm install` puede terminar instalando diferentes versiones de paquetes localmente, en un servidor CI y en los servidores de producción. Los contenedores resuelven esto al incluir todas las dependencias de npm con el código de la aplicación.
-- Incluso si las dependencias se bloquean mediante un archivo de ajuste, un paquete en particular del que depende [puede no estar disponible o eliminarse] (http://blog.npmjs.org/post/141577284765/kik-left-pad-and-npm) . Si esto sucede, no impide que un contenedor funcione, porque el contenedor todavía tiene una copia del paquete desde el momento en que se construyó el contenedor.
+Desplácese hasta la consola de Amazon ECR.
+En la página Repositorios, seleccione Crear repositorio.
+En la página Crear repositorio, introduzca el siguiente nombre para su repositorio: api.
 
-__Canalización mejorada__: el contenedor también permite que una organización de ingeniería cree una canalización estándar para el ciclo de vida de la aplicación. Por ejemplo:
+![](./assets/2.PNG)
 
-1. Los desarrolladores construyen y ejecutan el contenedor localmente.
-2. El servidor de CI ejecuta el mismo contenedor y ejecuta pruebas de integración para asegurarse de que supera las expectativas.
-3. El mismo contenedor se envía a un entorno de prueba donde se puede verificar su comportamiento en tiempo de ejecución mediante pruebas de carga o control de calidad manual.
-4. El mismo contenedor finalmente se envía a producción.
+### Paso 3: Crear y enviar la imagen Docker :
+![](./assets/1.PNG)
 
-Ser capaz de enviar exactamente el mismo contenedor a través de las cuatro etapas del proceso hace que la entrega de una aplicación confiable y de alta calidad sea considerablemente más fácil.
-
-__Sin mutaciones en las máquinas:__ Cuando las aplicaciones se implementan directamente en las instancias, corre el riesgo de que una mala implementación corrompa la configuración de una instancia de una manera que sea difícil de recuperar. Por ejemplo, imagina una aplicación implementada que requiere algunas configuraciones personalizadas en `/etc`. Esto puede convertirse en una implementación muy frágil y difícil de revertir si es necesario. Sin embargo, con una aplicación en contenedores, el contenedor lleva su propio sistema de archivos con su propio `/etc` y cualquier cambio de configuración personalizado que forme parte de este contenedor se aislará únicamente en el entorno de esa aplicación. Las configuraciones de la instancia subyacente siguen siendo las mismas. De hecho, un contenedor ni siquiera puede realizar cambios persistentes en el sistema de archivos sin un volumen montado explícito que le otorgue al contenedor acceso a un área limitada en la instancia del host.
-
-## ¿Por qué el servicio de contenedores EC2?
-
-EC2 Container Service proporciona orquestación para sus contenedores. Automatiza el proceso de lanzamiento de contenedores en su flota de instancias de acuerdo con las reglas que especifique, luego automatiza el seguimiento de dónde se ejecutan esos contenedores para que pueda usar un balanceador de carga para enviar tráfico a ellos. También tiene funciones integradas para implementar implementaciones sin tiempo de inactividad, recopilar métricas y registros de sus contenedores y escalar automáticamente la cantidad de contenedores que está ejecutando en función de las métricas.
-
-## Cambios en la aplicación para Docker
-
-1. __Proceso único en lugar de `clúster`.__ El primer y mayor cambio relacionado con la creación de contenedores de esta aplicación es deshacerse del `clúster`. Con los contenedores docker, el objetivo es ejecutar un solo proceso por contenedor, en lugar de un grupo de procesos.
-
-   El motivo de este cambio es que un contenedor liviano con un solo proceso permite una mayor granularidad y flexibilidad en la colocación de contenedores en la infraestructura. Un contenedor grande que tiene cuatro procesos y requiere cuatro núcleos de potencia de CPU solo se puede ejecutar en una instancia de un tamaño particular. Sin embargo, al dividirlo en cuatro contenedores, cada uno con un solo proceso, ahora podemos utilizar dos instancias más pequeñas que ejecutarán dos contenedores cada una, o incluso cuatro instancias diminutas que ejecutarán un solo contenedor cada una. O podríamos ir en la dirección opuesta y ejecutar fácilmente 64 de estos pequeños contenedores en una sola instancia masiva.
-
-2. __Crear `Dockerfile`:__ Este archivo es básicamente un script de compilación que crea el contenedor. El contenedor base desde el que se inicia el dockerfile contiene una versión específica de node.js. Luego, el resto de los comandos agregan tanto el código de la aplicación como la carpeta `node_modules` al contenedor. El resultado es una imagen de contenedor que es una unidad de implementación confiable. El contenedor se puede ejecutar localmente o en un servidor remoto. Funcionará igual en ambos lugares.
 
 ## Despliegue
 
@@ -118,8 +102,8 @@ Una vez que hayamos verificado que este nuevo microservicio funciona, podemos el
    $ ./deploy.sh <región> <nombre de pila>
 
 
-![](./assets/1.PNG)
-![](./assets/2.PNG)
+
+
 ![](./assets/3.PNG)
 ![](./assets/4.PNG)
 ![](./assets/5.PNG)
